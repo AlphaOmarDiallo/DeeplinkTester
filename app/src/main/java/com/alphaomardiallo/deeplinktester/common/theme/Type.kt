@@ -1,4 +1,4 @@
-package com.alphaomardiallo.deeplinktester.ui.theme
+package com.alphaomardiallo.deeplinktester.common.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
