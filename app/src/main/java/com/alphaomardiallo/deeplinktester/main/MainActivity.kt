@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 
 package com.alphaomardiallo.deeplinktester.main
 
@@ -11,19 +11,28 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.alphaomardiallo.deeplinktester.common.theme.DeeplinkTesterTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,61 +42,10 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background) {
-                    Column(content = {
-                        MainScreen()
-                    })
+                    MainHomeScreen()
                 }
             }
         }
-    }
-}
-
-@Composable
-fun MainScreen() {
-
-    val navController = rememberNavController()
-    val coroutineScope = rememberCoroutineScope()
-
-    Scaffold(
-        modifier = Modifier,
-        topBar = { AppTopBar() },
-        bottomBar = { },
-        snackbarHost = { },
-        content = { paddingValues ->
-            Box(modifier = Modifier.padding(paddingValues))
-        }
-
-    )
-}
-
-
-@Composable
-fun AppTopBar() {
-    TopAppBar(
-        title = { Text(text = stringResource(id = com.alphaomardiallo.deeplinktester.R.string.app_name_formatted)) },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary,
-            navigationIconContentColor = MaterialTheme.colorScheme.secondary,
-            titleContentColor = MaterialTheme.colorScheme.secondary
-        ),
-        navigationIcon = {
-            Image(
-                painter = painterResource(id = com.alphaomardiallo.deeplinktester.R.drawable.ic_link),
-                contentDescription = null
-            )
-        }
-
-    )
-}
-
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
-
-@Composable
-fun Button(context: Context) {
-    androidx.compose.material3.Button(onClick = { openIntent(context) }) {
-
     }
 }
 
@@ -102,10 +60,103 @@ fun openIntent(context: Context) {
 
 }
 
+//Composables
+
+@Composable
+fun MainHomeScreen() {
+
+    val sheetState = rememberBottomSheetState(
+        initialValue = BottomSheetValue.Collapsed
+    )
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = sheetState
+    )
+    val scope = rememberCoroutineScope()
+
+    BottomSheetScaffold(
+        topBar = { AppTopBar() },
+        modifier = Modifier,
+        scaffoldState = scaffoldState,
+        sheetContent = { MySheetContent() },
+        snackbarHost = { },
+        sheetGesturesEnabled = true,
+        sheetBackgroundColor = Color.DarkGray,
+        sheetElevation = BottomSheetScaffoldDefaults.SheetElevation,
+        sheetPeekHeight = BottomSheetScaffoldDefaults.SheetPeekHeight
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.Black),
+            contentAlignment = Alignment.Center
+        ) {
+            Button(onClick = {
+                scope.launch {
+                    if (sheetState.isCollapsed) {
+                        sheetState.expand()
+                    } else {
+                        sheetState.collapse()
+                    }
+                }
+            }) {
+                Text(text = "Bottom sheet fraction: ${sheetState.progress.fraction}")
+            }
+        }
+    }
+
+}
+
+@Composable
+private fun MySheetContent() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Bottom sheet",
+            fontSize = 60.sp
+        )
+    }
+}
+
+@Composable
+fun AppTopBar() {
+    TopAppBar(
+        title = {
+            Text(
+                text = stringResource(id = com.alphaomardiallo.deeplinktester.R.string.app_name_formatted),
+                fontSize = 16.sp
+
+            )
+        },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background,
+            navigationIconContentColor = MaterialTheme.colorScheme.secondary,
+            titleContentColor = MaterialTheme.colorScheme.secondary
+        ),
+        navigationIcon = {
+            Image(
+                painter = painterResource(id = com.alphaomardiallo.deeplinktester.R.drawable.ic_link),
+                contentDescription = null,
+                Modifier.padding(horizontal = 16.dp)
+            )
+        }
+
+    )
+}
+
+@Composable
+fun Button(context: Context) {
+    Button(onClick = { openIntent(context) }) {
+
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     DeeplinkTesterTheme {
-        Greeting("Android")
+
     }
 }
