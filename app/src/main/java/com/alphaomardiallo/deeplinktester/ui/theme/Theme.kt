@@ -1,4 +1,4 @@
-package com.alphaomardiallo.deeplinktester.common.theme
+package com.alphaomardiallo.deeplinktester.ui.theme
 
 import android.app.Activity
 import android.os.Build

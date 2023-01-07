@@ -1,4 +1,4 @@
-package com.alphaomardiallo.deeplinktester.common.domain
+package com.alphaomardiallo.deeplinktester.domain
 
 data class DeepLink(
     val id: Int,

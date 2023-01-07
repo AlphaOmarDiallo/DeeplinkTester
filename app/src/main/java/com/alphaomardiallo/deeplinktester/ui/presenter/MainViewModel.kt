@@ -1,9 +1,9 @@
-package com.alphaomardiallo.deeplinktester.main.presenter
+package com.alphaomardiallo.deeplinktester.ui.presenter
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.alphaomardiallo.deeplinktester.main.domain.UiHistoryDeeplink
-import com.alphaomardiallo.deeplinktester.main.domain.provideFakeListHistory
+import com.alphaomardiallo.deeplinktester.domain.UiHistoryDeeplink
+import com.alphaomardiallo.deeplinktester.domain.provideFakeListHistory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

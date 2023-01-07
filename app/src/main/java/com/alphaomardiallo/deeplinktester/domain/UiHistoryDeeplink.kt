@@ -1,4 +1,4 @@
-package com.alphaomardiallo.deeplinktester.main.domain
+package com.alphaomardiallo.deeplinktester.domain
 
 data class UiHistoryDeeplink(
     val id: Int,
