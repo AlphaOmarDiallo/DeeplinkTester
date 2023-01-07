@@ -140,14 +140,17 @@ fun AppTopBar() {
 fun MainContent(paddingValues: PaddingValues, context: Context) {
     Box(modifier = Modifier
         .fillMaxSize()
-        .padding(paddingValues)) {
+        .padding(paddingValues)
+    ) {
 
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)))
             DeeplinkSearch(context = context)
+            Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)))
         }
 
     }

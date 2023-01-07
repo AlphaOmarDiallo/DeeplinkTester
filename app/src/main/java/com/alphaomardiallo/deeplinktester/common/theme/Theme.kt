@@ -14,7 +14,11 @@ import androidx.core.view.ViewCompat
 private val DarkColorScheme = darkColorScheme(
     primary = primaryColor,
     secondary = secondaryColor,
-    tertiary = secondaryLightColor
+    tertiary = secondaryLightColor,
+    background = secondaryDarkColor,
+    onPrimary = primaryTextColor,
+    onSecondary = secondaryTextColor,
+    onBackground = primaryLightColor
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -55,7 +59,7 @@ fun DeeplinkTesterTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            (view.context as Activity).window.statusBarColor = colorScheme.primary.toArgb()
+            (view.context as Activity).window.statusBarColor = colorScheme.background.toArgb()
             ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = darkTheme
         }
     }
