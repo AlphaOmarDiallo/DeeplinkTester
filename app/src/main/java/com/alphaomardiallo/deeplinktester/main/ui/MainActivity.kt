@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 
-package com.alphaomardiallo.deeplinktester.main
+package com.alphaomardiallo.deeplinktester.main.ui
 
 import android.content.ContentValues.TAG
 import android.content.Context
@@ -14,11 +14,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -29,6 +32,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -39,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.alphaomardiallo.deeplinktester.R
 import com.alphaomardiallo.deeplinktester.common.theme.DeeplinkTesterTheme
+import com.alphaomardiallo.deeplinktester.main.domain.UiHistoryDeeplink
+import com.alphaomardiallo.deeplinktester.main.domain.provideFakeListHistory
 
 class MainActivity : ComponentActivity() {
 
@@ -67,7 +73,6 @@ fun openIntent(context: Context, uri: String?) {
 }
 
 //Composable
-
 @Composable
 fun MainScreen(context: Context) {
 
@@ -127,12 +132,14 @@ fun AppTopBar() {
         ),
         navigationIcon = {
             Image(
-                painter = painterResource(id = R.drawable.ic_link),
+                painter = painterResource(id = R.drawable.deeplink_tester),
                 contentDescription = null,
-                Modifier.padding(horizontal = dimensionResource(id = R.dimen.margin_large))
+                modifier = Modifier
+                    .padding(horizontal = dimensionResource(id = R.dimen.margin_large))
+                    .clip(CircleShape)
+                    .size(50.dp)
             )
         }
-
     )
 }
 
@@ -151,6 +158,9 @@ fun MainContent(paddingValues: PaddingValues, context: Context) {
             Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)))
             DeeplinkSearch(context = context)
             Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)))
+            DisplayHistoryTitle()
+            Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)))
+            HistoryDisplay()
         }
 
     }
@@ -159,14 +169,13 @@ fun MainContent(paddingValues: PaddingValues, context: Context) {
 @Composable
 fun DeeplinkSearch(context: Context) {
     var deeplinkToTest by remember { mutableStateOf(TextFieldValue("")) }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(dimensionResource(id = R.dimen.margin_medium)),
         shape = MaterialTheme.shapes.large,
         backgroundColor = MaterialTheme.colorScheme.secondary,
-        elevation = dimensionResource(id = R.dimen.margin_x_marge),
+        elevation = dimensionResource(id = R.dimen.margin_x_large),
         content = {
             Row(Modifier
                 .fillMaxWidth()
@@ -189,7 +198,15 @@ fun DeeplinkSearch(context: Context) {
                         containerColor = MaterialTheme.colorScheme.secondary,
                         unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground
                     ),
-                    singleLine = true
+                    singleLine = true,
+                    leadingIcon = {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_link),
+                            contentDescription = stringResource(
+                                id = R.string.content_description_icon_link),
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
                 )
                 Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)))
                 IconButton(
@@ -200,13 +217,99 @@ fun DeeplinkSearch(context: Context) {
                 ) {
                     Icon(imageVector = Icons.Filled.PlayArrow,
                         contentDescription = stringResource(
-                            id = R.string.content_description_icon_rocket_launcher)
+                            id = R.string.content_description_icon_play)
                     )
                 }
             }
         }
     )
 
+}
+
+@Composable
+fun DisplayHistoryTitle(){
+    Text(text = "History")
+}
+
+@Composable
+fun HistoryDisplay() {
+    var list by remember { mutableStateOf(provideFakeListHistory()) }
+
+    Box(Modifier.fillMaxWidth()) {
+        LazyColumn(content = {
+            items(list) { historyLink ->
+                HistoryLinkContainer(deeplink = historyLink)
+            }
+        })
+    }
+}
+
+@Composable
+fun HistoryLinkContainer(deeplink: UiHistoryDeeplink) {
+    Row(horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically) {
+        Box() {
+            ActionButtonHistoryDisplay(delete = true)
+        }
+        Box(modifier = Modifier.weight(1f)) {
+            LinkDisplayTextField(uriToDisplay = deeplink.link)
+        }
+        Box() {
+            ActionButtonHistoryDisplay(delete = false)
+        }
+    }
+}
+
+@Composable
+fun ActionButtonHistoryDisplay(delete: Boolean) {
+    IconButton(
+        onClick = { /*TODO*/ },
+        colors = IconButtonDefaults.iconButtonColors(
+            containerColor = MaterialTheme.colorScheme.primary
+        ),
+        modifier = Modifier
+            .padding(horizontal = dimensionResource(id = R.dimen.margin_small))
+            .clip(MaterialTheme.shapes.small)
+    ) {
+        Icon(imageVector = if (delete) Icons.Filled.Delete else Icons.Filled.PlayArrow,
+            contentDescription = stringResource(
+                id = if (delete) R.string.content_description_icon_play else R.string.content_description_icon_play)
+        )
+    }
+}
+
+@Composable
+fun LinkDisplayTextField(uriToDisplay: String) {
+
+    var deeplinkToDisplay by remember { mutableStateOf(TextFieldValue(uriToDisplay)) }
+
+    OutlinedTextField(
+        value = deeplinkToDisplay,
+        onValueChange = {
+            deeplinkToDisplay = it
+
+        },
+        modifier = Modifier
+            .padding(dimensionResource(id = R.dimen.margin_small))
+            .fillMaxWidth(),
+        label = { Text(text = stringResource(id = R.string.text_field_deep_link_hint)) },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+        colors = TextFieldDefaults.textFieldColors(
+            textColor = MaterialTheme.colorScheme.onSecondary,
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.secondary,
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground
+        ),
+        singleLine = true,
+        leadingIcon = {
+            Image(
+                painter = painterResource(id = R.drawable.ic_link),
+                contentDescription = stringResource(
+                    id = R.string.content_description_icon_link),
+                modifier = Modifier.size(30.dp)
+            )
+        }
+    )
 }
 
 @Composable
