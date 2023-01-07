@@ -2,16 +2,23 @@
 
 package com.alphaomardiallo.deeplinktester.main.ui
 
+import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.FrameMetrics.ANIMATION_DURATION
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,6 +31,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -33,29 +43,53 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.alphaomardiallo.deeplinktester.R
 import com.alphaomardiallo.deeplinktester.common.theme.DeeplinkTesterTheme
+import com.alphaomardiallo.deeplinktester.common.theme.cardCollapsedBackgroundColor
+import com.alphaomardiallo.deeplinktester.common.theme.cardExpandedBackgroundColor
 import com.alphaomardiallo.deeplinktester.main.domain.UiHistoryDeeplink
-import com.alphaomardiallo.deeplinktester.main.domain.provideFakeListHistory
+import com.alphaomardiallo.deeplinktester.main.presenter.MainViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import kotlin.math.roundToInt
 
+const val ANIMATION_DURATION = 500
+const val MIN_DRAG_AMOUNT = 6
+const val ACTION_ITEM_SIZE = 56
+const val CARD_HEIGHT = 56
+const val CARD_OFFSET = 168f // we have 3 icons in a row, so that's 56 * 3
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             DeeplinkTesterTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background) {
-                    MainScreen(this)
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    MainScreen(this, mainViewModel)
                 }
             }
         }
@@ -64,8 +98,10 @@ class MainActivity : ComponentActivity() {
 
 fun openIntent(context: Context, uri: String?) {
     try {
-        val intent = Intent(Intent.ACTION_VIEW,
-            Uri.parse(uri))
+        val intent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse(uri)
+        )
         context.startActivity(intent)
     } catch (exception: Exception) {
         Log.e(TAG, "openIntent: invalid uri")
@@ -74,7 +110,7 @@ fun openIntent(context: Context, uri: String?) {
 
 //Composable
 @Composable
-fun MainScreen(context: Context) {
+fun MainScreen(context: Context, viewModel: MainViewModel) {
 
     val sheetState = rememberBottomSheetState(
         initialValue = BottomSheetValue.Collapsed
@@ -90,8 +126,10 @@ fun MainScreen(context: Context) {
         scaffoldState = scaffoldState,
         sheetContent = { MySheetContent() },
         snackbarHost = { },
-        sheetShape = RoundedCornerShape(topEnd = dimensionResource(id = R.dimen.margin_large),
-            topStart = dimensionResource(id = R.dimen.margin_large)),
+        sheetShape = RoundedCornerShape(
+            topEnd = dimensionResource(id = R.dimen.margin_large),
+            topStart = dimensionResource(id = R.dimen.margin_large)
+        ),
         sheetGesturesEnabled = true,
         sheetBackgroundColor = Color.DarkGray,
         sheetElevation = BottomSheetScaffoldDefaults.SheetElevation,
@@ -103,7 +141,7 @@ fun MainScreen(context: Context) {
                 .background(color = Color.Black),
             contentAlignment = Alignment.Center
         ) {
-            MainContent(paddingValues = it, context = context)
+            MainContent(paddingValues = it, context = context, viewModel)
         }
     }
 }
@@ -126,7 +164,8 @@ fun AppTopBar() {
 
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.background,
             navigationIconContentColor = MaterialTheme.colorScheme.secondary,
             titleContentColor = MaterialTheme.colorScheme.secondary
         ),
@@ -144,10 +183,11 @@ fun AppTopBar() {
 }
 
 @Composable
-fun MainContent(paddingValues: PaddingValues, context: Context) {
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .padding(paddingValues)
+fun MainContent(paddingValues: PaddingValues, context: Context, viewModel: MainViewModel) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
     ) {
 
         Column(
@@ -160,7 +200,7 @@ fun MainContent(paddingValues: PaddingValues, context: Context) {
             Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)))
             DisplayHistoryTitle()
             Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)))
-            HistoryDisplay()
+            HistoryDisplay(viewModel)
         }
 
     }
@@ -177,9 +217,10 @@ fun DeeplinkSearch(context: Context) {
         backgroundColor = MaterialTheme.colorScheme.secondary,
         elevation = dimensionResource(id = R.dimen.margin_x_large),
         content = {
-            Row(Modifier
-                .fillMaxWidth()
-                .padding(dimensionResource(id = R.dimen.margin_medium)),
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(dimensionResource(id = R.dimen.margin_medium)),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -203,7 +244,8 @@ fun DeeplinkSearch(context: Context) {
                         Image(
                             painter = painterResource(id = R.drawable.ic_link),
                             contentDescription = stringResource(
-                                id = R.string.content_description_icon_link),
+                                id = R.string.content_description_icon_link
+                            ),
                             modifier = Modifier.size(30.dp)
                         )
                     }
@@ -215,9 +257,11 @@ fun DeeplinkSearch(context: Context) {
                         containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    Icon(imageVector = Icons.Filled.PlayArrow,
+                    Icon(
+                        imageVector = Icons.Filled.PlayArrow,
                         contentDescription = stringResource(
-                            id = R.string.content_description_icon_play)
+                            id = R.string.content_description_icon_play
+                        )
                     )
                 }
             }
@@ -227,27 +271,46 @@ fun DeeplinkSearch(context: Context) {
 }
 
 @Composable
-fun DisplayHistoryTitle(){
+fun DisplayHistoryTitle() {
     Text(text = "History")
 }
 
+@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
-fun HistoryDisplay() {
-    var list by remember { mutableStateOf(provideFakeListHistory()) }
+fun HistoryDisplay(viewModel: MainViewModel) {
 
-    Box(Modifier.fillMaxWidth()) {
-        LazyColumn(content = {
-            items(list) { historyLink ->
-                HistoryLinkContainer(deeplink = historyLink)
+    val listCards by viewModel.cards.collectAsStateWithLifecycle()
+    val revealedCardIds by viewModel.revealedCardIdsList.collectAsStateWithLifecycle()
+    Scaffold() {
+        LazyColumn(modifier = Modifier.padding(it)) {
+            items(listCards, UiHistoryDeeplink::id) { card ->
+                Box(Modifier.fillMaxWidth()) {
+                    ActionsRow(
+                        actionIconSize = ACTION_ITEM_SIZE.dp,
+                        onDelete = {},
+                        onEdit = {},
+                        onFavorite = {}
+                    )
+                    DraggableCard(
+                        card = card,
+                        isRevealed = revealedCardIds.contains(card.id),
+                        cardHeight = CARD_HEIGHT.dp,
+                        cardOffset = CARD_OFFSET.dp(),
+                        onExpand = { viewModel.onItemExpanded(card.id) },
+                        onCollapse = { viewModel.onItemCollapsed(card.id) },
+                    )
+                }
             }
-        })
+        }
     }
 }
 
 @Composable
 fun HistoryLinkContainer(deeplink: UiHistoryDeeplink) {
-    Row(horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Box() {
             ActionButtonHistoryDisplay(delete = true)
         }
@@ -271,9 +334,11 @@ fun ActionButtonHistoryDisplay(delete: Boolean) {
             .padding(horizontal = dimensionResource(id = R.dimen.margin_small))
             .clip(MaterialTheme.shapes.small)
     ) {
-        Icon(imageVector = if (delete) Icons.Filled.Delete else Icons.Filled.PlayArrow,
+        Icon(
+            imageVector = if (delete) Icons.Filled.Delete else Icons.Filled.PlayArrow,
             contentDescription = stringResource(
-                id = if (delete) R.string.content_description_icon_play else R.string.content_description_icon_play)
+                id = if (delete) R.string.content_description_icon_play else R.string.content_description_icon_play
+            )
         )
     }
 }
@@ -305,7 +370,8 @@ fun LinkDisplayTextField(uriToDisplay: String) {
             Image(
                 painter = painterResource(id = R.drawable.ic_link),
                 contentDescription = stringResource(
-                    id = R.string.content_description_icon_link),
+                    id = R.string.content_description_icon_link
+                ),
                 modifier = Modifier.size(30.dp)
             )
         }
@@ -321,9 +387,11 @@ private fun MySheetContent() {
         contentAlignment = Alignment.TopCenter,
 
         ) {
-        LazyColumn(Modifier
-            .background(MaterialTheme.colorScheme.primary)
-            .fillMaxHeight()) {
+        LazyColumn(
+            Modifier
+                .background(MaterialTheme.colorScheme.primary)
+                .fillMaxHeight()
+        ) {
             // the first item that is visible
             item {
                 Box(
@@ -333,11 +401,15 @@ private fun MySheetContent() {
                         .background(color = MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
-                    Row(horizontalArrangement = Arrangement.Center,
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()) {
-                        Image(imageVector = Icons.Filled.Star,
-                            contentDescription = stringResource(id = R.string.content_description_icon_star))
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Image(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = stringResource(id = R.string.content_description_icon_star)
+                        )
                         Text(
                             text = stringResource(id = R.string.favorites),
                             color = MaterialTheme.colorScheme.onPrimary
@@ -366,3 +438,133 @@ private fun MySheetContent() {
         }
     }
 }
+
+@SuppressLint("UnusedTransitionTargetStateParameter")
+@Composable
+fun DraggableCard(
+    card: UiHistoryDeeplink,
+    cardHeight: Dp,
+    isRevealed: Boolean,
+    cardOffset: Float,
+    onExpand: () -> Unit,
+    onCollapse: () -> Unit,
+) {
+    val offsetX = remember { mutableStateOf(0f) }
+    val transitionState = remember {
+        MutableTransitionState(isRevealed).apply {
+            targetState = !isRevealed
+        }
+    }
+    val transition = updateTransition(transitionState, "cardTransition")
+    val cardBgColor by transition.animateColor(
+        label = "cardBgColorTransition",
+        transitionSpec = { tween(durationMillis = ANIMATION_DURATION) },
+        targetValueByState = {
+            if (isRevealed) cardExpandedBackgroundColor else cardCollapsedBackgroundColor
+        }
+    )
+    val offsetTransition by transition.animateFloat(
+        label = "cardOffsetTransition",
+        transitionSpec = { tween(durationMillis = ANIMATION_DURATION) },
+        targetValueByState = { if (isRevealed) cardOffset - offsetX.value else -offsetX.value },
+
+        )
+    val cardElevation by transition.animateDp(
+        label = "cardElevation",
+        transitionSpec = { tween(durationMillis = ANIMATION_DURATION) },
+        targetValueByState = { if (isRevealed) 40.dp else 2.dp }
+    )
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .height(cardHeight)
+            .offset { IntOffset((offsetX.value + offsetTransition).roundToInt(), 0) }
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures { change, dragAmount ->
+                    val original = Offset(offsetX.value, 0f)
+                    val summed = original + Offset(x = dragAmount, y = 0f)
+                    val newValue = Offset(x = summed.x.coerceIn(0f, cardOffset), y = 0f)
+                    if (newValue.x >= 10) {
+                        onExpand()
+                        return@detectHorizontalDragGestures
+                    } else if (newValue.x <= 0) {
+                        onCollapse()
+                        return@detectHorizontalDragGestures
+                    }
+                    if (change.positionChange() != Offset.Zero) change.consume()
+                    offsetX.value = newValue.x
+                }
+            },
+        backgroundColor = cardBgColor,
+        shape = remember {
+            RoundedCornerShape(0.dp)
+        },
+        elevation = cardElevation,
+        content = { CardTitle(cardTitle = card.link) }
+    )
+}
+
+@Composable
+fun CardTitle(cardTitle: String) {
+    Text(
+        text = cardTitle,
+        color = Color.Black,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        textAlign = TextAlign.Center,
+    )
+}
+
+@Composable
+fun ActionsRow(
+    actionIconSize: Dp,
+    onDelete: () -> Unit,
+    onEdit: () -> Unit,
+    onFavorite: () -> Unit,
+) {
+    Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        IconButton(
+            modifier = Modifier.size(actionIconSize),
+            onClick = onDelete,
+            content = {
+                Icon(
+                    painter = rememberVectorPainter(image = Icons.Outlined.Delete),
+                    tint = Color.Gray,
+                    contentDescription = "delete action",
+                )
+            }
+        )
+        IconButton(
+            modifier = Modifier.size(actionIconSize),
+            onClick = onEdit,
+            content = {
+                Icon(
+                    painter = rememberVectorPainter(image = Icons.Outlined.Edit),
+                    tint = Color.Gray,
+                    contentDescription = "edit action",
+                )
+            },
+        )
+        IconButton(
+            modifier = Modifier.size(actionIconSize),
+            onClick = onFavorite,
+            content = {
+                Icon(
+                    painter = rememberVectorPainter(image = Icons.Outlined.Favorite),
+                    tint = Color.Red,
+                    contentDescription = "Expandable Arrow",
+                )
+            }
+        )
+    }
+}
+
+fun Float.dp(): Float = this * density + 0.5f
+
+val density: Float
+    get() = Resources.getSystem().displayMetrics.density
+
+
