@@ -3,7 +3,9 @@
     <string name="app_name_formatted">Deeplink Tester</string>
     <string name="content_description_icon_star">Icon representing a star</string>
     <string name="content_description_icon_play">Icon representing a play button</string>
+    <string name="content_description_icon_delete">Icon representing a delete button</string>
     <string name="content_description_icon_rocket_launcher">Icon representing a rocket</string>
+    <string name="content_description_icon_link">Icon representing a link</string>
     <string name="favorites">Favorites</string>
     <string name="text_field_deep_link_hint">Deeplink URI</string>
     <string name="subtitle_app_bar">Simplest way to test your deep links</string>
