@@ -2,12 +2,11 @@ package com.alphaomardiallo.deeplinktester.common.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Blue900 = Color(0xFF0000d0)
-val Purple50 = Color(0xFFeee5fc)
-val Purple400 = Color(0xFF7845ee)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
-
-val Grey100 = Color(0xFFe9e9e9)
+val primaryColor = Color(0XFFE3FE72)
+val primaryLightColor = Color(0xFFffff6e)
+//val primaryDarkColor = Color(0xFF99aa00)
+val secondaryColor = Color(0xFF212121)
+val secondaryLightColor = Color(0xFF1B191F)
+val secondaryDarkColor = Color(0xFF000000)
+val primaryTextColor = Color(0xFF0C1202)
+val secondaryTextColor = Color(0xFFABABAD)

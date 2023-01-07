@@ -13,28 +13,35 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.alphaomardiallo.deeplinktester.R
 import com.alphaomardiallo.deeplinktester.common.theme.DeeplinkTesterTheme
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -42,28 +49,27 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background) {
-                    MainHomeScreen()
+                    MainScreen(this)
                 }
             }
         }
     }
 }
 
-fun openIntent(context: Context) {
+fun openIntent(context: Context, uri: String?) {
     try {
         val intent = Intent(Intent.ACTION_VIEW,
-            Uri.parse("twitter://ran?type=ce&stage=2&reference=stage-2&category=ouioui"))
+            Uri.parse(uri))
         context.startActivity(intent)
     } catch (exception: Exception) {
-        Log.e(TAG, "openIntent: error")
+        Log.e(TAG, "openIntent: invalid uri")
     }
-
 }
 
-//Composables
+//Composable
 
 @Composable
-fun MainHomeScreen() {
+fun MainScreen(context: Context) {
 
     val sheetState = rememberBottomSheetState(
         initialValue = BottomSheetValue.Collapsed
@@ -79,6 +85,8 @@ fun MainHomeScreen() {
         scaffoldState = scaffoldState,
         sheetContent = { MySheetContent() },
         snackbarHost = { },
+        sheetShape = RoundedCornerShape(topEnd = dimensionResource(id = R.dimen.margin_large),
+            topStart = dimensionResource(id = R.dimen.margin_large)),
         sheetGesturesEnabled = true,
         sheetBackgroundColor = Color.DarkGray,
         sheetElevation = BottomSheetScaffoldDefaults.SheetElevation,
@@ -90,19 +98,111 @@ fun MainHomeScreen() {
                 .background(color = Color.Black),
             contentAlignment = Alignment.Center
         ) {
-            Button(onClick = {
-                scope.launch {
-                    if (sheetState.isCollapsed) {
-                        sheetState.expand()
-                    } else {
-                        sheetState.collapse()
-                    }
-                }
-            }) {
-                Text(text = "Bottom sheet fraction: ${sheetState.progress.fraction}")
-            }
+            MainContent(paddingValues = it, context = context)
         }
     }
+}
+
+@Composable
+fun AppTopBar() {
+    TopAppBar(
+        title = {
+            Column {
+                Text(
+                    text = stringResource(id = R.string.app_name_formatted),
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSecondary
+                )
+                Text(
+                    text = stringResource(id = R.string.subtitle_app_bar),
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSecondary
+                )
+
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background,
+            navigationIconContentColor = MaterialTheme.colorScheme.secondary,
+            titleContentColor = MaterialTheme.colorScheme.secondary
+        ),
+        navigationIcon = {
+            Image(
+                painter = painterResource(id = R.drawable.ic_link),
+                contentDescription = null,
+                Modifier.padding(horizontal = dimensionResource(id = R.dimen.margin_large))
+            )
+        }
+
+    )
+}
+
+@Composable
+fun MainContent(paddingValues: PaddingValues, context: Context) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .padding(paddingValues)) {
+
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            DeeplinkSearch(context = context)
+        }
+
+    }
+}
+
+@Composable
+fun DeeplinkSearch(context: Context) {
+    var deeplinkToTest by remember { mutableStateOf(TextFieldValue("")) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(dimensionResource(id = R.dimen.margin_medium)),
+        shape = MaterialTheme.shapes.large,
+        backgroundColor = MaterialTheme.colorScheme.secondary,
+        elevation = dimensionResource(id = R.dimen.margin_x_marge),
+        content = {
+            Row(Modifier
+                .fillMaxWidth()
+                .padding(dimensionResource(id = R.dimen.margin_medium)),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = deeplinkToTest,
+                    onValueChange = {
+                        deeplinkToTest = it
+
+                    },
+                    modifier = Modifier.weight(1f),
+                    label = { Text(text = stringResource(id = R.string.text_field_deep_link_hint)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = MaterialTheme.colorScheme.onSecondary,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground
+                    ),
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)))
+                IconButton(
+                    onClick = { openIntent(context = context, uri = deeplinkToTest.text) },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Icon(imageVector = Icons.Filled.PlayArrow,
+                        contentDescription = stringResource(
+                            id = R.string.content_description_icon_rocket_launcher)
+                    )
+                }
+            }
+        }
+    )
 
 }
 
@@ -111,52 +211,52 @@ private fun MySheetContent() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "Bottom sheet",
-            fontSize = 60.sp
-        )
-    }
-}
+            .fillMaxHeight(0.6f),
+        contentAlignment = Alignment.TopCenter,
 
-@Composable
-fun AppTopBar() {
-    TopAppBar(
-        title = {
-            Text(
-                text = stringResource(id = com.alphaomardiallo.deeplinktester.R.string.app_name_formatted),
-                fontSize = 16.sp
-
-            )
-        },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background,
-            navigationIconContentColor = MaterialTheme.colorScheme.secondary,
-            titleContentColor = MaterialTheme.colorScheme.secondary
-        ),
-        navigationIcon = {
-            Image(
-                painter = painterResource(id = com.alphaomardiallo.deeplinktester.R.drawable.ic_link),
-                contentDescription = null,
-                Modifier.padding(horizontal = 16.dp)
-            )
+        ) {
+        LazyColumn(Modifier
+            .background(MaterialTheme.colorScheme.primary)
+            .fillMaxHeight()) {
+            // the first item that is visible
+            item {
+                Box(
+                    modifier = Modifier
+                        .height(56.dp)
+                        .fillMaxWidth()
+                        .background(color = MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()) {
+                        Image(imageVector = Icons.Filled.Star,
+                            contentDescription = stringResource(id = R.string.content_description_icon_star))
+                        Text(
+                            text = stringResource(id = R.string.favorites),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+            }
+            item {
+                Text(text = "something")
+            }
+            item {
+                Text(text = "something")
+            }
+            item {
+                Text(text = "something")
+            }
+            item {
+                Text(text = "something")
+            }
+            item {
+                Text(text = "something")
+            }
+            item {
+                Text(text = "something")
+            }
         }
-
-    )
-}
-
-@Composable
-fun Button(context: Context) {
-    Button(onClick = { openIntent(context) }) {
-
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    DeeplinkTesterTheme {
-
     }
 }
