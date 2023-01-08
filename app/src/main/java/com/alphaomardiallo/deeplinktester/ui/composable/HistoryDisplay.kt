@@ -30,8 +30,8 @@ fun HistoryDisplay(viewModel: MainViewModel) {
                     ActionsRow(
                         actionIconSize = ACTION_ITEM_SIZE.dp,
                         onDelete = {},
-                        //onEdit = {},
-                        onFavorite = {}
+                        onFavorite = {},
+                        isFavorite = card.isFavorite
                     )
                     DraggableCard(
                         card = card,

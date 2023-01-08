@@ -3,13 +3,46 @@ package com.alphaomardiallo.deeplinktester.domain
 data class UiHistoryDeeplink(
     val id: Int,
     var link: String,
-    var timeStamp: Long = 879290L,
+    var title: String?,
+    var isFavorite: Boolean = false,
+    var timeStamp: Long = 7383862L
 )
 
 fun provideFakeListHistory() =
     listOf(
-        UiHistoryDeeplink(id = 0, link = "dakar://"),
-        UiHistoryDeeplink(id = 1, link = "dakar://"),
-        UiHistoryDeeplink(id = 2, link = "dakar://"),
-        UiHistoryDeeplink(id = 3, link = "dakar://")
+        UiHistoryDeeplink(
+            id = 0,
+            link = "dakar://",
+            title = null,
+            isFavorite = true,
+            timeStamp = 0
+        ),
+        UiHistoryDeeplink(
+            id = 1,
+            link = "dakar://",
+            title = null,
+            isFavorite = false,
+            timeStamp = 0
+        ),
+        UiHistoryDeeplink(
+            id = 2,
+            link = "dakar://",
+            title = null,
+            isFavorite = false,
+            timeStamp = 0
+        ),
+        UiHistoryDeeplink(
+            id = 3,
+            link = "dakar://",
+            title = null,
+            isFavorite = false,
+            timeStamp = 0
+        ),
+        UiHistoryDeeplink(
+            id = 4,
+            link = "dakar://",
+            title = null,
+            isFavorite = true,
+            timeStamp = 0
+        )
     )
