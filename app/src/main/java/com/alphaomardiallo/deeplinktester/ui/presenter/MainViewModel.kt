@@ -1,5 +1,10 @@
 package com.alphaomardiallo.deeplinktester.ui.presenter
 
+import android.content.ContentValues
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alphaomardiallo.deeplinktester.domain.UiHistoryDeeplink
@@ -54,5 +59,15 @@ class MainViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-
+    fun openIntent(context: Context, uri: String?) {
+        try {
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(uri)
+            )
+            context.startActivity(intent)
+        } catch (exception: Exception) {
+            Log.e(ContentValues.TAG, "openIntent: invalid uri")
+        }
+    }
 }
