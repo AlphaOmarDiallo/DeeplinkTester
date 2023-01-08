@@ -2,6 +2,7 @@ package com.alphaomardiallo.deeplinktester.ui.composable
 
 import android.content.Context
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
@@ -60,24 +61,26 @@ fun DeeplinkSearch(context: Context, viewModel: MainViewModel) {
             }
         )
         Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)))
-        IconButton(
-            onClick = {
-                viewModel.openIntent(
-                    context = context,
-                    uri = deeplinkToTest.text,
+        Box(modifier = Modifier.background(MaterialTheme.colorScheme.primary)){
+            IconButton(
+                onClick = {
+                    viewModel.openIntent(
+                        context = context,
+                        uri = deeplinkToTest.text,
+                    )
+                },
+                enabled = true,
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
-            },
-            enabled = true,
-            colors = IconButtonDefaults.iconButtonColors(
-                containerColor = MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Icon(
-                imageVector = Icons.Filled.PlayArrow,
-                contentDescription = stringResource(
-                    id = R.string.content_description_icon_play
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.PlayArrow,
+                    contentDescription = stringResource(
+                        id = R.string.content_description_icon_play
+                    )
                 )
-            )
+            }
         }
     }
 }
