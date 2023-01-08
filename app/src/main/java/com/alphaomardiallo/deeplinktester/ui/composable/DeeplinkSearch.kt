@@ -65,8 +65,9 @@ fun DeeplinkSearch(context: Context, viewModel: MainViewModel) {
                 viewModel.openIntent(
                     context = context,
                     uri = deeplinkToTest.text,
-                    )
+                )
             },
+            enabled = true,
             colors = IconButtonDefaults.iconButtonColors(
                 containerColor = MaterialTheme.colorScheme.primary
             )
