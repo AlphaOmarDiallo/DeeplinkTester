@@ -75,7 +75,7 @@ fun DeeplinkSearch(context: Context, viewModel: MainViewModel) {
                 )
             ) {
                 Icon(
-                    imageVector = Icons.Filled.PlayArrow,
+                    painter = painterResource(id = R.drawable.ic_baseline_rocket_launch_24),
                     contentDescription = stringResource(
                         id = R.string.content_description_icon_play
                     )
