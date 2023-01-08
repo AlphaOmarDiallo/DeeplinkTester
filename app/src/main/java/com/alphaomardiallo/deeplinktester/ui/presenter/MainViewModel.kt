@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alphaomardiallo.deeplinktester.domain.UiHistoryDeeplink
 import com.alphaomardiallo.deeplinktester.domain.provideFakeListHistory
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,7 +68,8 @@ class MainViewModel @Inject constructor() : ViewModel() {
             )
             context.startActivity(intent)
         } catch (exception: Exception) {
-            Log.e(ContentValues.TAG, "openIntent: invalid uri")
+            //Snackbar.make(root, exception.message, Snackbar.LENGTH_SHORT).show()
+            Log.e(ContentValues.TAG, "openIntent: ${exception.message}")
         }
     }
 }

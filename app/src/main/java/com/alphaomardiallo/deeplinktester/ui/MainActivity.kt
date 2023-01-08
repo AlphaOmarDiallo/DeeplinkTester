@@ -5,6 +5,7 @@ package com.alphaomardiallo.deeplinktester.ui
 import android.content.Context
 import android.content.res.Resources
 import android.os.Bundle
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
