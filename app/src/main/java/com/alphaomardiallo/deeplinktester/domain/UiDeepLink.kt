@@ -44,5 +44,47 @@ fun provideFakeListHistory() =
             title = null,
             isFavorite = true,
             timeStamp = 0
+        ),
+        UiHistoryDeeplink(
+            id = 6,
+            link = "dakar://",
+            title = null,
+            isFavorite = true,
+            timeStamp = 0
+        ),
+        UiHistoryDeeplink(
+            id = 7,
+            link = "dakar://",
+            title = null,
+            isFavorite = true,
+            timeStamp = 0
+        ),
+        UiHistoryDeeplink(
+            id = 8,
+            link = "dakar://",
+            title = null,
+            isFavorite = true,
+            timeStamp = 0
+        ),
+        UiHistoryDeeplink(
+            id = 9,
+            link = "dakar://",
+            title = null,
+            isFavorite = true,
+            timeStamp = 0
+        ),
+        UiHistoryDeeplink(
+            id = 10,
+            link = "dakar://",
+            title = null,
+            isFavorite = true,
+            timeStamp = 0
+        ),
+        UiHistoryDeeplink(
+            id = 5,
+            link = "dakar://",
+            title = null,
+            isFavorite = true,
+            timeStamp = 0
         )
     )
