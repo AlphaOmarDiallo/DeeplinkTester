@@ -5,7 +5,6 @@ package com.alphaomardiallo.deeplinktester.ui
 import android.content.Context
 import android.content.res.Resources
 import android.os.Bundle
-import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -31,10 +30,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.alphaomardiallo.deeplinktester.R
-import com.alphaomardiallo.deeplinktester.ui.composable.DeeplinkSearch
-import com.alphaomardiallo.deeplinktester.ui.composable.DisplaySectionTitle
-import com.alphaomardiallo.deeplinktester.ui.composable.HistoryDisplay
-import com.alphaomardiallo.deeplinktester.ui.composable.TopAppBarDLT
+import com.alphaomardiallo.deeplinktester.ui.composable.*
 import com.alphaomardiallo.deeplinktester.ui.presenter.MainViewModel
 import com.alphaomardiallo.deeplinktester.ui.theme.DeeplinkTesterTheme
 import com.alphaomardiallo.deeplinktester.ui.theme.primaryColor
@@ -69,6 +65,7 @@ class MainActivity : ComponentActivity() {
 }
 
 //Composable
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainScreen(context: Context, viewModel: MainViewModel) {
 
@@ -93,7 +90,11 @@ fun MainScreen(context: Context, viewModel: MainViewModel) {
         sheetGesturesEnabled = true,
         sheetBackgroundColor = Color.DarkGray,
         sheetElevation = BottomSheetScaffoldDefaults.SheetElevation,
-        sheetPeekHeight = BottomSheetScaffoldDefaults.SheetPeekHeight
+        sheetPeekHeight = BottomSheetScaffoldDefaults.SheetPeekHeight,
+        floatingActionButton = {
+                               FabApp()
+        },
+        floatingActionButtonPosition = FabPosition.End
     ) {
         Box(
             modifier = Modifier
