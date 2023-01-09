@@ -41,7 +41,7 @@ const val ANIMATION_DURATION_CUSTOM = 500
 const val MIN_DRAG_AMOUNT = 6
 const val ACTION_ITEM_SIZE = 56
 const val CARD_HEIGHT = 56
-const val CARD_OFFSET = 168f // we have 3 icons in a row, so that's 56 * 3
+const val CARD_OFFSET = 112f // we have 3 icons in a row, so that's 56 * 3
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
