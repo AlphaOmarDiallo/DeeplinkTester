@@ -73,6 +73,7 @@ fun openIntent(context: Context, uri: String?) {
 }
 
 //Composable
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainScreen(context: Context) {
 
@@ -227,13 +228,13 @@ fun DeeplinkSearch(context: Context) {
 }
 
 @Composable
-fun DisplayHistoryTitle(){
+fun DisplayHistoryTitle() {
     Text(text = "History")
 }
 
 @Composable
 fun HistoryDisplay() {
-    var list by remember { mutableStateOf(provideFakeListHistory()) }
+    val list by remember { mutableStateOf(provideFakeListHistory()) }
 
     Box(Modifier.fillMaxWidth()) {
         LazyColumn(content = {
@@ -248,13 +249,13 @@ fun HistoryDisplay() {
 fun HistoryLinkContainer(deeplink: UiHistoryDeeplink) {
     Row(horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically) {
-        Box() {
+        Box {
             ActionButtonHistoryDisplay(delete = true)
         }
         Box(modifier = Modifier.weight(1f)) {
             LinkDisplayTextField(uriToDisplay = deeplink.link)
         }
-        Box() {
+        Box {
             ActionButtonHistoryDisplay(delete = false)
         }
     }
