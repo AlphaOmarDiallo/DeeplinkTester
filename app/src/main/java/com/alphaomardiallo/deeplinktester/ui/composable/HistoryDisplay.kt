@@ -1,5 +1,6 @@
 package com.alphaomardiallo.deeplinktester.ui.composable
 
+import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,12 +15,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.alphaomardiallo.deeplinktester.domain.UiHistoryDeeplink
+import com.alphaomardiallo.deeplinktester.domain.dp
 import com.alphaomardiallo.deeplinktester.ui.*
 import com.alphaomardiallo.deeplinktester.ui.presenter.MainViewModel
 
 @OptIn(ExperimentalLifecycleComposeApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryDisplay(viewModel: MainViewModel) {
+fun HistoryDisplay(viewModel: MainViewModel, context: Context) {
 
     val listCards by viewModel.cards.collectAsStateWithLifecycle()
     val revealedCardIds by viewModel.revealedCardIdsList.collectAsStateWithLifecycle()
@@ -40,6 +42,7 @@ fun HistoryDisplay(viewModel: MainViewModel) {
                         cardOffset = CARD_OFFSET.dp(),
                         onExpand = { viewModel.onItemExpanded(card.id) },
                         onCollapse = { viewModel.onItemCollapsed(card.id) },
+                        onClick = { viewModel.openIntent(context = context, uri = card.link)}
                     )
                 }
             }

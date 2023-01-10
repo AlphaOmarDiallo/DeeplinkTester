@@ -3,6 +3,7 @@ package com.alphaomardiallo.deeplinktester.ui.composable
 import android.annotation.SuppressLint
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,6 +35,7 @@ fun DraggableCard(
     cardOffset: Float,
     onExpand: () -> Unit,
     onCollapse: () -> Unit,
+    onClick: () -> Unit
 ) {
     val transitionState = remember {
         MutableTransitionState(isRevealed).apply {
@@ -73,7 +75,8 @@ fun DraggableCard(
                         dragAmount < -MIN_DRAG_AMOUNT -> onCollapse()
                     }
                 }
-            },
+            }
+            .clickable { onClick() },
         backgroundColor = cardBgColor,
         shape = remember {
             RoundedCornerShape(0.dp)

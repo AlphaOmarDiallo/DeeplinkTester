@@ -92,7 +92,7 @@ fun MainScreen(context: Context, viewModel: MainViewModel) {
         sheetElevation = BottomSheetScaffoldDefaults.SheetElevation,
         sheetPeekHeight = BottomSheetScaffoldDefaults.SheetPeekHeight,
         floatingActionButton = {
-                               FabApp()
+            FabApp()
         },
         floatingActionButtonPosition = FabPosition.End
     ) {
@@ -125,7 +125,7 @@ fun MainContent(paddingValues: PaddingValues, context: Context, viewModel: MainV
             Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)))
             DisplaySectionTitle(title = "History")
             Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)))
-            HistoryDisplay(viewModel)
+            HistoryDisplay(viewModel, context)
         }
     }
 }
@@ -193,10 +193,3 @@ private fun BottomSheetContent() {
         }
     }
 }
-
-fun Float.dp(): Float = this * density + 0.5f
-
-val density: Float
-    get() = Resources.getSystem().displayMetrics.density
-
-
