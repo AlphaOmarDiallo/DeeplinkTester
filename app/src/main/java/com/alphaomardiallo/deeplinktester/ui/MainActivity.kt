@@ -5,7 +5,6 @@ package com.alphaomardiallo.deeplinktester.ui
 import android.content.Context
 import android.content.res.Resources
 import android.os.Bundle
-import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -31,10 +30,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.alphaomardiallo.deeplinktester.R
-import com.alphaomardiallo.deeplinktester.ui.composable.DeeplinkSearch
-import com.alphaomardiallo.deeplinktester.ui.composable.DisplaySectionTitle
-import com.alphaomardiallo.deeplinktester.ui.composable.HistoryDisplay
-import com.alphaomardiallo.deeplinktester.ui.composable.TopAppBarDLT
+import com.alphaomardiallo.deeplinktester.ui.composable.*
 import com.alphaomardiallo.deeplinktester.ui.presenter.MainViewModel
 import com.alphaomardiallo.deeplinktester.ui.theme.DeeplinkTesterTheme
 import com.alphaomardiallo.deeplinktester.ui.theme.primaryColor
@@ -45,7 +41,7 @@ const val ANIMATION_DURATION_CUSTOM = 500
 const val MIN_DRAG_AMOUNT = 6
 const val ACTION_ITEM_SIZE = 56
 const val CARD_HEIGHT = 56
-const val CARD_OFFSET = 168f // we have 3 icons in a row, so that's 56 * 3
+const val CARD_OFFSET = 112f // we have 3 icons in a row, so that's 56 * 3
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -69,6 +65,7 @@ class MainActivity : ComponentActivity() {
 }
 
 //Composable
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainScreen(context: Context, viewModel: MainViewModel) {
 
@@ -93,7 +90,11 @@ fun MainScreen(context: Context, viewModel: MainViewModel) {
         sheetGesturesEnabled = true,
         sheetBackgroundColor = Color.DarkGray,
         sheetElevation = BottomSheetScaffoldDefaults.SheetElevation,
-        sheetPeekHeight = BottomSheetScaffoldDefaults.SheetPeekHeight
+        sheetPeekHeight = BottomSheetScaffoldDefaults.SheetPeekHeight,
+        floatingActionButton = {
+            FabApp()
+        },
+        floatingActionButtonPosition = FabPosition.End
     ) {
         Box(
             modifier = Modifier
@@ -124,7 +125,7 @@ fun MainContent(paddingValues: PaddingValues, context: Context, viewModel: MainV
             Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)))
             DisplaySectionTitle(title = "History")
             Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)))
-            HistoryDisplay(viewModel)
+            HistoryDisplay(viewModel, context)
         }
     }
 }
@@ -192,10 +193,3 @@ private fun BottomSheetContent() {
         }
     }
 }
-
-fun Float.dp(): Float = this * density + 0.5f
-
-val density: Float
-    get() = Resources.getSystem().displayMetrics.density
-
-
